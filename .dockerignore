@@ -1,0 +1,36 @@
+# Keep the build context small and free of local or sensitive files.
+
+# Version control
+.git
+.gitignore
+.github
+
+# Local databases, logs, and build artifacts (regenerated at runtime/build)
+*.db
+*.log
+*.exe
+/bin/
+go-cache/
+*.test
+*.out
+
+# Local environment / secrets
+.env
+.env.*
+
+# Documentation and private files (not needed to run the app)
+documents/
+_private_docs/
+
+# Office lock/temp files
+~$*
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Container files themselves
+Dockerfile
+.dockerignore
