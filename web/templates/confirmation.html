@@ -1,0 +1,5 @@
+{{ define "confirmation" }}{{ template "header" . }}
+<h1>Order Placed</h1>
+<p>Your order ID is <code>{{ .OrderID }}</code>.</p>
+<p><a href="/">Continue shopping</a></p>
+{{ template "footer" . }}{{ end }}

@@ -1,0 +1,20 @@
+{{ define "order_history" }}{{ template "header" . }}
+<h1>Your Orders</h1>
+
+{{ if not .Orders }}
+  <p>No orders yet.</p>
+{{ else }}
+<table class="table">
+  <tr><th>ID</th><th>Status</th><th>Total</th><th>Placed</th><th>Action</th></tr>
+  {{ range .Orders }}
+  <tr>
+    <td>{{ .ID }}</td>
+    <td>{{ .Status }}</td>
+    <td>${{ printf "%.2f" .Total }}</td>
+    <td>{{ .CreatedAt }}</td>
+    <td><a href="/order/{{ .ID }}">View</a></td>
+  </tr>
+  {{ end }}
+</table>
+{{ end }}
+{{ template "footer" . }}{{ end }}

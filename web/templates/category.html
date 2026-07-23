@@ -1,0 +1,19 @@
+{{ define "category" }}{{ template "header" . }}
+<h1>Category: {{ .CategoryID }}</h1>
+<div class="grid">
+  {{ range .Products }}
+  <article class="card">
+    <a href="/product/{{ .ID }}" class="thumb-wrap">
+      <img class="thumb" src="/media/products/{{ .ID }}/main.jpg" alt="{{ .Title }}" loading="lazy" onerror="this.style.display='none'">
+    </a>
+    <h3><a href="/product/{{ .ID }}">{{ .Title }}</a></h3>
+    <p>
+      <span class="price">${{ printf "%.2f" .Price }}</span>
+      — <span class="badge">{{ .Condition }}</span>
+    </p>
+  </article>
+  {{ else }}
+  <p>No items in this category yet</p>
+  {{ end }}
+</div>
+{{ template "footer" . }}{{ end }}

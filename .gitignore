@@ -1,0 +1,16 @@
+# Build artifacts
+retrobytes.exe
+*.exe
+
+# Runtime-generated data and logs (auto-created on run)
+retrobytes.db
+*.db
+retrobytes.log
+*.log
+
+# Go build/test cache
+go-cache/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db

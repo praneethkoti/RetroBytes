@@ -1,0 +1,57 @@
+{{ define "admin_inventory" }}{{ template "header" . }}
+<h1>Inventory</h1>
+<table class="table">
+  <tr><th>Product</th><th>Region</th><th>Qty</th><th>Edit</th></tr>
+  {{ range .Rows }}
+  <tr>
+    <td>{{ .Title }}</td>
+    <td>{{ .RegionCode }}</td>
+    <td>{{ .Qty }}</td>
+    <td>
+      <form method="post" action="/admin/inventory" class="inline-form">
+        <input type="hidden" name="csrf" value="{{ $.CSRFToken }}">
+        <input type="hidden" name="product_id" value="{{ .ProductID }}">
+        <input type="hidden" name="region" value="{{ .RegionCode }}">
+        <input type="number" name="qty" value="{{ .Qty }}" min="0" style="width:6rem">
+        <button class="btn">Update</button>
+      </form>
+    </td>
+  </tr>
+  {{ end }}
+</table>
+
+<h3>Add / Upsert</h3>
+<form method="post" action="/admin/inventory" class="form">
+  <input type="hidden" name="csrf" value="{{ .CSRFToken }}">
+  <input name="product_id" placeholder="product id (e.g., snes-001)" required>
+  <input name="region" placeholder="region (e.g., 20742)" required>
+  <input type="number" name="qty" placeholder="qty" min="0" required>
+  <button class="btn">Save</button>
+</form>
+
+<h2 style="margin-top:2rem;">Recent Orders</h2>
+<table class="table">
+  <tr><th>ID</th><th>Customer</th><th>Status</th><th>Total</th><th>When</th><th>Action</th></tr>
+  {{ range .Orders }}
+  <tr>
+    <td>{{ .ID }}</td>
+    <td>{{ .CustomerName }}</td>
+    <td>{{ .Status }}</td>
+    <td>${{ printf "%.2f" .Total }}</td>
+    <td>{{ .CreatedAt }}</td>
+    <td>
+      <form method="post" action="/admin/orders/{{ .ID }}/status" class="inline-form">
+        <input type="hidden" name="csrf" value="{{ $.CSRFToken }}">
+        <select name="status">
+          <option value="PLACED" {{ if eq .Status "PLACED" }}selected{{ end }}>PLACED</option>
+          <option value="RESERVED" {{ if eq .Status "RESERVED" }}selected{{ end }}>RESERVED</option>
+          <option value="SHIPPED" {{ if eq .Status "SHIPPED" }}selected{{ end }}>SHIPPED</option>
+          <option value="CANCELED" {{ if eq .Status "CANCELED" }}selected{{ end }}>CANCELED</option>
+        </select>
+        <button class="btn">Update</button>
+      </form>
+    </td>
+  </tr>
+  {{ end }}
+</table>
+{{ template "footer" . }}{{ end }}

@@ -1,0 +1,37 @@
+{{ define "search" }}{{ template "header" . }}
+<h1>Search</h1>
+<form method="get" action="/search">
+  <input name="q" value="{{ .Q }}" placeholder="Search products" pattern="[A-Za-z0-9 _\\-']{1,50}" maxlength="50"/>
+  <select name="category">
+    <option value="">All Categories</option>
+    <option value="retro-consoles" {{ if eq .CategoryID "retro-consoles" }}selected{{ end }}>Retro Consoles</option>
+    <option value="vintage-radios" {{ if eq .CategoryID "vintage-radios" }}selected{{ end }}>Vintage Radios</option>
+    <option value="retro-shoes" {{ if eq .CategoryID "retro-shoes" }}selected{{ end }}>Retro Shoes</option>
+    <option value="retro-electronics" {{ if eq .CategoryID "retro-electronics" }}selected{{ end }}>Retro Electronics</option>
+  </select>
+  <select name="condition">
+    <option value="">Any Condition</option>
+    <option value="FIRST_HAND" {{ if eq .Condition "FIRST_HAND" }}selected{{ end }}>First-hand</option>
+    <option value="SECOND_HAND" {{ if eq .Condition "SECOND_HAND" }}selected{{ end }}>Second-hand</option>
+  </select>
+  <button type="submit">Apply</button>
+</form>
+
+<p>{{ .Count }} result(s)</p>
+<div class="grid">
+  {{ range .Products }}
+  <article class="card">
+    <a href="/product/{{ .ID }}" class="thumb-wrap">
+      <img class="thumb" src="/media/products/{{ .ID }}/main.jpg" alt="{{ .Title }}" loading="lazy" onerror="this.style.display='none'">
+    </a>
+    <h3><a href="/product/{{ .ID }}">{{ .Title }}</a></h3>
+    <p>
+      <span class="price">${{ printf "%.2f" .Price }}</span>
+      — <span class="badge">{{ .Condition }}</span>
+    </p>
+  </article>
+  {{ else }}
+  <p>No matches — clear filters to try again.</p>
+  {{ end }}
+</div>
+{{ template "footer" . }}{{ end }}

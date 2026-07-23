@@ -1,0 +1,19 @@
+{{ define "admin_users" }}{{ template "header" . }}
+<h1>Users</h1>
+<table class="table">
+  <tr><th>Email</th><th>Name</th><th>Role</th><th>Action</th></tr>
+  {{ range .Users }}
+  <tr>
+    <td>{{ .Email }}</td>
+    <td>{{ .Name }}</td>
+    <td>{{ .Role }}</td>
+    <td>
+      <form method="post" action="/admin/users/{{ .ID }}/delete" class="inline-form">
+        <input type="hidden" name="csrf" value="{{ $.CSRFToken }}">
+        <button class="btn danger" onclick="return confirm('Delete {{ .Email }} and cancel their orders?')">Delete</button>
+      </form>
+    </td>
+  </tr>
+  {{ end }}
+</table>
+{{ template "footer" . }}{{ end }}

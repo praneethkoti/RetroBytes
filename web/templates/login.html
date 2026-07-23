@@ -1,0 +1,41 @@
+{{ define "login" }}
+  {{ template "header" . }}
+
+  <main>
+    <h1>Sign in</h1>
+
+    {{ if .Err }}
+      <div class="alert-bad">{{ .Err }}</div>
+    {{ end }}
+
+    <form method="post" action="/login" class="form">
+      <input type="hidden" name="csrf" value="{{ .CSRFToken }}">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+
+      <button type="submit" class="btn primary">Sign in</button>
+    </form>
+
+  </main>
+
+  <script>
+    // Sync CSRF hidden field with the latest csrf_ cookie (helps when tokens rotate)
+    (function() {
+      var m = document.cookie.match(/(?:^|; )csrf_=([^;]+)/);
+      if (m) {
+        var tok = decodeURIComponent(m[1]);
+        var f = document.querySelector('input[name="csrf"]');
+        if (f) f.value = tok;
+      }
+    })();
+  </script>
+
+  {{ template "footer" . }}
+{{ end }}

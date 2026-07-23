@@ -1,0 +1,23 @@
+{{ define "home" }}{{ template "header" . }}
+
+<section class="hero-landing">
+  <div class="hero-copy">
+    <h1>Retro Bytes</h1>
+    <p class="tagline">A home for vintage radios, classic consoles, and retro electronics.</p>
+    <div class="hero-cta">
+      <a class="btn primary" href="/">Browse Categories</a>
+      <a class="btn" href="/search">Search</a>
+    </div>
+  </div>
+</section>
+<section class="hero-landing">
+  <h1>Categories</h1>
+  <ul>
+    {{ range .Categories }}
+    <li><a href="/category/{{ .ID }}">{{ .Name }}</a></li>
+    {{ else }}
+    <li>No categories</li>
+    {{ end }}
+  </ul>
+</section>
+{{ template "footer" . }}{{ end }}

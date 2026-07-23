@@ -1,0 +1,19 @@
+{{ define "cart" }}{{ template "header" . }}
+<h1>Your Cart</h1>
+<table>
+  <tr><th>Item</th><th>Condition</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr>
+  {{ range .Cart.Items }}
+  <tr>
+    <td>{{ .Title }}</td>
+    <td>{{ .Condition }}</td>
+    <td>{{ .Qty }}</td>
+    <td>${{ printf "%.2f" .PriceAtAdd }}</td>
+    <td>${{ printf "%.2f" .Subtotal }}</td>
+  </tr>
+  {{ else }}
+  <tr><td colspan="5">Your cart is empty.</td></tr>
+  {{ end }}
+</table>
+<p><strong>Total:</strong> ${{ printf "%.2f" .Cart.Total }}</p>
+<p><a href="/checkout">Checkout</a></p>
+{{ template "footer" . }}{{ end }}
