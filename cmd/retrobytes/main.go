@@ -150,6 +150,18 @@ func main() {
 	app.Get("/search", limiter.New(limiter.Config{Max: 20, Expiration: time.Minute}), deps.SearchHandler.Search)
 	app.Get("/category/:id", deps.CategoryHandler.List)
 
+	// Public security posture page (informational, no auth).
+	app.Get("/security", func(c *fiber.Ctx) error {
+		data := fiber.Map{}
+		if u := c.Locals("user"); u != nil {
+			data["User"] = u
+		}
+		if tok := c.Locals("CSRFToken"); tok != nil {
+			data["CSRFToken"] = tok
+		}
+		return c.Render("security", data)
+	})
+
 	// Product pages
 	app.Get("/product", func(c *fiber.Ctx) error {
 		return c.Status(404).Render("notfound", fiber.Map{"Message": "This item is no longer available"})

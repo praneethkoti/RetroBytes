@@ -465,4 +465,29 @@ code{
   padding:.7rem .9rem; border-radius:9px; margin-bottom:1rem; max-width:480px;
 }
 
+/* --- Security posture page ---------------------------------------------- */
+.sec-intro{ max-width: 68ch; color: var(--ink-soft) }
+.sec-list{ display:grid; gap:1rem; margin: 1.4rem 0 }
+.sec-item{
+  background: var(--panel);
+  border:1px solid var(--border-str);
+  border-left: 4px solid var(--teal);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 1.1rem 1.2rem;
+}
+.sec-item h3{ margin:.1rem 0 .5rem }
+.sec-item p{ margin:.3rem 0; max-width: 72ch; color: var(--ink) }
+.sec-item ul{ margin:.4rem 0 .2rem; padding-left:1.1rem; max-width:72ch }
+.sec-item li{ margin:.25rem 0 }
+.sec-src{
+  display:inline-block; margin-top:.6rem;
+  font-family: var(--font-mono); font-size:.78rem;
+}
+.sec-src a{ color: var(--rust-deep) }
+.sec-note{
+  color: var(--muted); font-size:.92rem; max-width:68ch; margin-top:1.4rem;
+  border-top:1px solid var(--border); padding-top:1rem;
+}
+
 @media (min-height:900px){ footer{ margin-top: 3.5rem } }

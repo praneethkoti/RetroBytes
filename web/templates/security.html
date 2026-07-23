@@ -1,0 +1,127 @@
+{{ define "security" }}{{ template "header" . }}
+<p class="kicker">How this app is built</p>
+<h1>Security posture</h1>
+<p class="sec-intro">
+  RetroBytes is a small store, but it is built as a security exercise, so the
+  application controls are deliberate and testable. This page describes the
+  controls in place today, in plain language, with a link to the source for each
+  one so the claims can be checked against the code.
+</p>
+
+<div class="sec-list">
+
+  <section class="sec-item">
+    <h3>Session management</h3>
+    <ul>
+      <li>The session id is regenerated on a successful login, so a session id
+        planted before login cannot be reused afterward (session fixation
+        defense).</li>
+      <li>Sessions carry an expiry. A logged-in session stops resolving a user
+        once it passes its configurable time to live (SESSION_TTL_HOURS,
+        default 24 hours).</li>
+      <li>The Secure flag on the session and CSRF cookies is driven by
+        configuration (COOKIE_SECURE), so cookies are marked Secure when the app
+        runs behind HTTPS.</li>
+    </ul>
+    <span class="sec-src">Source:
+      <a href="https://github.com/praneethkoti/RetroBytes/blob/main/internal/services/auth_service.go">internal/services/auth_service.go</a>,
+      <a href="https://github.com/praneethkoti/RetroBytes/blob/main/internal/repos/user_repo.go">internal/repos/user_repo.go</a>
+    </span>
+  </section>
+
+  <section class="sec-item">
+    <h3>Authorization</h3>
+    <ul>
+      <li>The wishlist is scoped to the authenticated user id, so wishlist reads
+        and writes are bound to the logged-in account rather than to the session
+        alone.</li>
+      <li>Admin routes are role gated. A request without the ADMIN role is
+        refused.</li>
+      <li>Order viewing is owner checked. A caller who does not own an order is
+        answered with a 404 (order not found) rather than a 403, so order ids
+        cannot be probed for existence by enumeration.</li>
+    </ul>
+    <span class="sec-src">Source:
+      <a href="https://github.com/praneethkoti/RetroBytes/blob/main/internal/http/handlers/wishlist_handler.go">internal/http/handlers/wishlist_handler.go</a>,
+      <a href="https://github.com/praneethkoti/RetroBytes/blob/main/internal/http/handlers/authz.go">internal/http/handlers/authz.go</a>,
+      <a href="https://github.com/praneethkoti/RetroBytes/blob/main/internal/http/handlers/order_handler.go">internal/http/handlers/order_handler.go</a>
+    </span>
+  </section>
+
+  <section class="sec-item">
+    <h3>Input validation</h3>
+    <ul>
+      <li>Region and ZIP inputs are length limited and pattern checked.</li>
+      <li>Search terms are restricted to an allowed character set and capped at
+        50 characters.</li>
+      <li>Quantities are parsed and bounded, and required fields on orders and
+        other forms are checked server side.</li>
+    </ul>
+    <span class="sec-src">Source:
+      <a href="https://github.com/praneethkoti/RetroBytes/blob/main/internal/validate/validate.go">internal/validate/validate.go</a>
+    </span>
+  </section>
+
+  <section class="sec-item">
+    <h3>Output handling</h3>
+    <p>
+      Pages are rendered with Go's html/template, which escapes interpolated
+      values by context. User supplied and admin supplied fields (product names,
+      descriptions, emails) are auto-escaped on output, and the templates do not
+      use any raw HTML bypass.
+    </p>
+    <span class="sec-src">Source:
+      <a href="https://github.com/praneethkoti/RetroBytes/blob/main/web/templates/product.html">web/templates/product.html</a>
+    </span>
+  </section>
+
+  <section class="sec-item">
+    <h3>Logging</h3>
+    <p>
+      Security relevant events are logged (authentication outcomes, access
+      denials, validation failures, rate limit hits, admin actions). Sensitive
+      values are deliberately kept out of the logs: session ids, CSRF tokens, and
+      raw rejected search input are not written. Only a request id and IP are
+      kept for correlation.
+    </p>
+    <span class="sec-src">Source:
+      <a href="https://github.com/praneethkoti/RetroBytes/blob/main/internal/log/log.go">internal/log/log.go</a>
+    </span>
+  </section>
+
+  <section class="sec-item">
+    <h3>Credential handling</h3>
+    <ul>
+      <li>No default login credentials ship with the code.</li>
+      <li>Demo shopper accounts are seeded only when demo seeding is explicitly
+        enabled (SEED_DEMO).</li>
+      <li>The admin account is created only from environment variables
+        (ADMIN_EMAIL and ADMIN_PASSWORD). There is no hardcoded admin password.</li>
+    </ul>
+    <span class="sec-src">Source:
+      <a href="https://github.com/praneethkoti/RetroBytes/blob/main/internal/repos/db.go">internal/repos/db.go</a>
+    </span>
+  </section>
+
+  <section class="sec-item">
+    <h3>Supply chain</h3>
+    <p>
+      Continuous integration runs govulncheck (Go's vulnerability scanner) and
+      gosec (static analysis) alongside build, vet, and tests. The dependency
+      tree and the application code paths, including the template rendering and
+      CSRF token handling, are re-checked on each run rather than asserted once,
+      so newly disclosed advisories surface over time.
+    </p>
+    <span class="sec-src">Source:
+      <a href="https://github.com/praneethkoti/RetroBytes/blob/main/.github/workflows/ci.yml">.github/workflows/ci.yml</a>
+    </span>
+  </section>
+
+</div>
+
+<p class="sec-note">
+  This is a learning and portfolio project, not a production service, and it is
+  not deployed with real customer data. The controls above describe the current
+  state of the code.
+</p>
+{{ template "footer" . }}{{ end }}
