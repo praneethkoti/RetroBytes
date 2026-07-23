@@ -20,6 +20,7 @@
     <a href="/search">Search</a>
     <a href="/cart">Cart</a>
     <a href="/wishlist">Wishlist</a>
+    <a href="/security" class="nav-security">Security</a>
     {{ if .User }}<a href="/orders">Orders</a>{{ end }}
     {{ if and .User (eq .User.Role "ADMIN") }}<a href="/admin">Admin</a>{{ end }}
     {{ if .User }}
