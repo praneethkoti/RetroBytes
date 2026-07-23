@@ -11,9 +11,10 @@
     <td>{{ .Name }}</td>
     <td>{{ .Role }}</td>
     <td>
-      <form method="post" action="/admin/users/{{ .ID }}/delete" class="inline-form">
+      <form method="post" action="/admin/users/{{ .ID }}/delete" class="inline-form"
+            onsubmit="return confirm('Delete {{ .Email }}? This removes the user and their wishlist and cancels their orders. This cannot be undone.');">
         <input type="hidden" name="csrf" value="{{ $.CSRFToken }}">
-        <button type="submit" class="btn danger" onclick="return confirm('Delete {{ .Email }} and cancel their orders?')">Delete</button>
+        <button type="submit" class="btn danger">Delete</button>
       </form>
     </td>
   </tr>
