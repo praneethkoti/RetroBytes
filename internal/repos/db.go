@@ -183,7 +183,6 @@ func seedIfEmpty(db *sqlx.DB) error {
 	tx.MustExec(`INSERT INTO categories(id,name) VALUES
 	  ('retro-consoles','Retro Gaming Consoles'),
 	  ('vintage-radios','Vintage Radios'),
-	  ('retro-shoes','Retro Shoes'),
 	  ('retro-electronics','Retro Electronics')`)
 
 	tx.MustExec(`INSERT INTO products(id,category_id,title,description,condition,price,images_json) VALUES
