@@ -214,5 +214,11 @@ func main() {
 		return c.Status(404).Render("notfound", fiber.Map{"Message": "Page not found"})
 	})
 
-	log.Fatal(app.Listen(":8081"))
+	// Listen on the configured port (PORT env, default 8081). Accept either a
+	// bare port ("8081") or an address already containing a colon (":8081").
+	addr := cfg.Port
+	if !strings.Contains(addr, ":") {
+		addr = ":" + addr
+	}
+	log.Fatal(app.Listen(addr))
 }

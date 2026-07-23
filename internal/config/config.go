@@ -24,9 +24,11 @@ type Config struct {
 }
 
 func Load() Config {
+	// Listen port comes from PORT (hosting platforms inject this). Default 8081
+	// so local behavior is unchanged when PORT is unset.
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "8081"
 	}
 	dsn := os.Getenv("DB_DSN")
 	if dsn == "" {
