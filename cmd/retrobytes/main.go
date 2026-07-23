@@ -176,10 +176,10 @@ func main() {
 	app.Get("/order/:id", deps.OrderHandler.View)
 	app.Get("/orders", handlers.RequireUser(authSvc), deps.OrderHandler.History)
 
-	// Wishlist
-	app.Get("/wishlist", deps.WishlistHandler.List)
-	app.Post("/wishlist", deps.WishlistHandler.Save)
-	app.Post("/wishlist/delete", deps.WishlistHandler.Unsave)
+	// Wishlist (bound to an authenticated user; anonymous callers are sent to login)
+	app.Get("/wishlist", handlers.RequireUser(authSvc), deps.WishlistHandler.List)
+	app.Post("/wishlist", handlers.RequireUser(authSvc), deps.WishlistHandler.Save)
+	app.Post("/wishlist/delete", handlers.RequireUser(authSvc), deps.WishlistHandler.Unsave)
 
 	// Auth routes (login throttled)
 	app.Get("/login", authH.LoginForm)
