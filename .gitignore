@@ -1,6 +1,12 @@
 # Build artifacts
 retrobytes.exe
 *.exe
+/bin/
+
+# Go build/test artifacts and coverage
+go-cache/
+*.test
+*.out
 
 # Runtime-generated data and logs (auto-created on run)
 retrobytes.db
@@ -8,9 +14,12 @@ retrobytes.db
 retrobytes.log
 *.log
 
-# Go build/test cache
-go-cache/
+# Secrets / local environment
+.env
+.env.*
 
 # OS / editor cruft
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/
