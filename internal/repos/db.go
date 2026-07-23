@@ -2,6 +2,7 @@ package repos
 
 import (
 	"log"
+	"os"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
@@ -258,22 +259,60 @@ func seedDefaultData(db *sqlx.DB) error {
 	return tx.Commit()
 }
 
-// seedUsers ensures two USERs and one ADMIN exist (idempotent).
+// seedUsers seeds accounts idempotently, but only what the environment opts in
+// to, so a publicly shipped build carries no default logins.
+//
+//   - Demo USER accounts (alice/bob/luke/yoda, password Passw0rd!) are seeded
+//     only when SEED_DEMO=true. They are for local demoing and are never
+//     seeded by default.
+//   - The ADMIN account is seeded only when both ADMIN_EMAIL and ADMIN_PASSWORD
+//     are set. There is no hardcoded admin password, so no fixed admin
+//     credential ships with the code.
 func seedUsers(db *sqlx.DB) error {
 	type u struct {
 		ID, Email, Name, Role, Hash string
 	}
-	mk := func(id, email, name, role, raw string) u {
-		h, _ := bcrypt.GenerateFromPassword([]byte(raw), 12)
-		return u{ID: id, Email: email, Name: name, Role: role, Hash: string(h)}
+	mk := func(id, email, name, role, raw string) (u, error) {
+		h, err := bcrypt.GenerateFromPassword([]byte(raw), 12)
+		if err != nil {
+			return u{}, err
+		}
+		return u{ID: id, Email: email, Name: name, Role: role, Hash: string(h)}, nil
 	}
 
-	users := []u{
-		mk("u-alice", "alice@retrobytes.test", "Alice", "USER", "Passw0rd!"),
-		mk("u-bob", "bob@retrobytes.test", "Bob", "USER", "Passw0rd!"),
-		mk("u-luke", "luke@retrobytes.test", "Luke", "USER", "Passw0rd!"),
-		mk("u-yoda", "yoda@retrobytes.test", "Yoda", "USER", "Passw0rd!"),
-		mk("u-admin", "admin@retrobytes.test", "Admin", "ADMIN", "Passw0rd!"),
+	var users []u
+
+	if strings.EqualFold(os.Getenv("SEED_DEMO"), "true") {
+		for _, d := range []struct{ id, email, name string }{
+			{"u-alice", "alice@retrobytes.test", "Alice"},
+			{"u-bob", "bob@retrobytes.test", "Bob"},
+			{"u-luke", "luke@retrobytes.test", "Luke"},
+			{"u-yoda", "yoda@retrobytes.test", "Yoda"},
+		} {
+			x, err := mk(d.id, d.email, d.name, "USER", "Passw0rd!")
+			if err != nil {
+				return err
+			}
+			users = append(users, x)
+		}
+		log.Println("[seed] SEED_DEMO=true: seeding demo USER accounts")
+	}
+
+	adminEmail := os.Getenv("ADMIN_EMAIL")
+	adminPass := os.Getenv("ADMIN_PASSWORD")
+	if adminEmail != "" && adminPass != "" {
+		x, err := mk("u-admin", adminEmail, "Admin", "ADMIN", adminPass)
+		if err != nil {
+			return err
+		}
+		users = append(users, x)
+		log.Printf("[seed] seeding ADMIN account for %s (from ADMIN_EMAIL/ADMIN_PASSWORD)", adminEmail)
+	} else {
+		log.Println("[seed] no ADMIN_EMAIL/ADMIN_PASSWORD set: skipping admin seed (no default admin credential)")
+	}
+
+	if len(users) == 0 {
+		return nil
 	}
 
 	tx := db.MustBegin()
