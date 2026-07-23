@@ -28,7 +28,9 @@ func main() {
 
 	// Optional file logging
 	if cfg.LogFile != "" {
-		f, err := os.OpenFile(cfg.LogFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		// 0600: the audit log can hold request metadata, so restrict it to the
+		// owning user (matters on a Linux host where 0644 is world-readable).
+		f, err := os.OpenFile(cfg.LogFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 		if err != nil {
 			log.Printf("[warn] could not open log file %s: %v", cfg.LogFile, err)
 		} else {

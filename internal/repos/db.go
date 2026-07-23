@@ -306,7 +306,9 @@ func seedUsers(db *sqlx.DB) error {
 			return err
 		}
 		users = append(users, x)
-		log.Printf("[seed] seeding ADMIN account for %s (from ADMIN_EMAIL/ADMIN_PASSWORD)", adminEmail)
+		// Report that an admin is being seeded without echoing the address,
+		// consistent with the project's log-minimization approach.
+		log.Println("[seed] seeding ADMIN account from ADMIN_EMAIL/ADMIN_PASSWORD")
 	} else {
 		log.Println("[seed] no ADMIN_EMAIL/ADMIN_PASSWORD set: skipping admin seed (no default admin credential)")
 	}
