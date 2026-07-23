@@ -16,7 +16,7 @@ The review's summary tallies Critical 2 / High 3 / Medium 3 / Low 2 (10 total), 
 | # | Finding (CWE) | Reported severity | Verdict | Outcome |
 |---|---|---|---|---|
 | 1 | IDOR in order viewing (CWE-639) | Critical | False positive | Dismissed, no change |
-| 2 | Missing authorization on wishlist (CWE-285/862) | Critical | Partially valid | Fixed |
+| 2 | Missing authorization on wishlist (CWE-285/862) | Critical | Confirmed | Fixed |
 | 3 | Missing CSRF match validation (CWE-352/351) | High | False positive (core) | Dismissed core claim; Secure-flag hardening applied |
 | 4 | Weak session binding / no expiration (CWE-522/384) | High | Confirmed | Fixed |
 | 5 | Open redirect on login (CWE-601) | High | False positive | Dismissed, no change |
@@ -39,14 +39,16 @@ Changes:
 
 Regression tests: `TestSessionRotatedOnLogin` (SR-AUTHZ-05), `TestExpiredSessionRejected` (SR-AUTHZ-06).
 
-### Finding 2 (Partially valid, downgraded to Medium): Missing authorization on wishlist
-Commit `fix(wishlist): require authentication for wishlist read and write routes`.
+### Finding 2 (Confirmed): Missing authorization on wishlist
+Commits `fix(wishlist): require authentication for wishlist read and write routes` and `fix(wishlist): scope wishlist to authenticated user id`.
 
-The wishlist save, unsave, and list routes were reachable anonymously and scoped only by the anonymous `sid` cookie, so a wishlist was never bound to an authenticated identity. This is not the horizontal IDOR the report suggested (the wishlist id is derived server-side from the secret cookie, never from client input, so one user cannot target another user's wishlist by request tampering), but the routes genuinely required no login.
+The wishlist save, unsave, and list routes were reachable anonymously and scoped only by the anonymous `sid` cookie, so a wishlist was never bound to an authenticated identity. This is not the horizontal IDOR the report suggested (the wishlist id is derived server-side, never from client input, so one user cannot target another user's wishlist by request tampering), but the routes genuinely required no login and the wishlist was tied to a session rather than a user.
 
-Change: the three wishlist routes are now gated by `RequireUser`, binding wishlist operations to a logged-in user. Anonymous callers are redirected to `/login`.
+Changes, in two steps:
+1. The three wishlist routes are gated by `RequireUser`, so wishlist operations require a logged-in user. Anonymous callers are redirected to `/login`.
+2. The wishlist is now scoped to the authenticated user's id rather than the session id. `WishlistHandler.List`, `Save`, and `Unsave` read the authenticated user from `c.Locals("user")` (set by `RequireUser`) and pass `user.ID` to the wishlist service (`internal/http/handlers/wishlist_handler.go`). The wishlist row is therefore keyed by the user id, so a user can only ever read or modify their own wishlist, independent of session. `UserRepo.DeleteUserCascade` also deletes the user-keyed wishlist so account deletion stays clean.
 
-Regression test: `TestWishlistRequiresAuth` (SR-AUTHZ-07).
+Regression tests: `TestWishlistRequiresAuth` (SR-AUTHZ-07) for the auth gate, and `TestWishlistScopedToUser` plus `TestWishlistRepoKeyedByOwner` (SR-AUTHZ-08) for the user-id scoping. The scoping test asserts the wishlist row is keyed by the user id (`u-alice`) and not by the session id, and was verified to fail when the handler keys by session id instead.
 
 ### Finding 7 (Partially valid, Medium): DoS via missing pagination limits
 Commit `fix(catalog): cap search and listing page size to bound query work`.

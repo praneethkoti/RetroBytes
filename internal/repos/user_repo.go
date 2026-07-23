@@ -158,6 +158,13 @@ func (r *UserRepo) DeleteUserCascade(userID string) error {
 		}
 	}
 
+	// Delete the user-scoped wishlist (keyed by the user's id; wishlist_items
+	// cascade). This is separate from the session-keyed cleanup above because
+	// wishlists are now bound to the authenticated user id, not the session.
+	if _, err := tx.Exec(`DELETE FROM wishlists WHERE id=?`, userID); err != nil {
+		return err
+	}
+
 	// Finally delete user
 	if _, err := tx.Exec(`DELETE FROM users WHERE id=?`, userID); err != nil {
 		return err
