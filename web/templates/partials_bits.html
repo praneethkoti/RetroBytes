@@ -1,0 +1,8 @@
+{{/* Shared display helpers. No custom template funcs so every engine (app and
+     tests) can parse these without extra registration. */}}
+
+{{/* condlabel maps a raw condition enum to a human label. Pass the condition
+     string as the pipeline value, e.g. {{ template "condlabel" .Condition }}. */}}
+{{ define "condlabel" -}}
+{{- if eq . "SECOND_HAND" }}Second-hand{{ else if eq . "FIRST_HAND" }}New{{ else }}{{ . }}{{ end -}}
+{{ end }}

@@ -2,16 +2,19 @@
 
 <section class="hero-landing">
   <div class="hero-copy">
-    <h1>Retro Bytes</h1>
-    <p class="tagline">A home for vintage radios, classic consoles, and retro electronics.</p>
+    <p class="kicker">Vintage electronics, restored and ready</p>
+    <h1>Sound and games from the golden age of gear.</h1>
+    <p class="tagline">Vintage radios, classic consoles, and retro electronics, each checked, graded, and tracked by local stock. Find the piece, check availability by ZIP, and bring it home.</p>
     <div class="hero-cta">
-      <a class="btn primary" href="/">Browse Categories</a>
-      <a class="btn" href="/search">Search</a>
+      <a class="btn primary" href="/search">Browse the shelves</a>
+      <a class="btn secondary" href="/search">Search by keyword</a>
     </div>
   </div>
 </section>
+
 <section class="hero-landing">
-  <h1>Categories</h1>
+  <p class="kicker">Shop by category</p>
+  <h2>Categories</h2>
   <ul>
     {{ range .Categories }}
     <li><a href="/category/{{ .ID }}">{{ .Name }}</a></li>
