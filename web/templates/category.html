@@ -1,5 +1,6 @@
 {{ define "category" }}{{ template "header" . }}
-<h1>Category: {{ .CategoryID }}</h1>
+<p class="kicker">Category</p>
+<h1>{{ .CategoryName }}</h1>
 <div class="grid">
   {{ range .Products }}
   <article class="card">
@@ -9,11 +10,11 @@
     <h3><a href="/product/{{ .ID }}">{{ .Title }}</a></h3>
     <p>
       <span class="price">${{ printf "%.2f" .Price }}</span>
-      — <span class="badge">{{ .Condition }}</span>
+      <span class="badge">{{ template "condlabel" .Condition }}</span>
     </p>
   </article>
   {{ else }}
-  <p>No items in this category yet</p>
+  <p class="empty">No items in this category yet.</p>
   {{ end }}
 </div>
 {{ template "footer" . }}{{ end }}

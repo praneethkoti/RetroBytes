@@ -1,4 +1,7 @@
 {{ define "notfound" }}{{ template "header" . }}
-<h1>{{ .Message }}</h1>
-<p><a href="/">Back to home</a></p>
+<section class="panel" style="max-width:560px; text-align:center">
+  <p class="kicker">Signal lost</p>
+  <h1>{{ .Message }}</h1>
+  <p><a class="btn primary" href="/">Back to home</a></p>
+</section>
 {{ template "footer" . }}{{ end }}

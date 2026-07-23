@@ -1,27 +1,39 @@
 {{ define "order" }}{{ template "layout" . }}{{ end }}
 {{ define "content" }}
+<p class="kicker">Confirmed</p>
 <h1>Order Confirmation</h1>
 
-<p><strong>Order ID:</strong> <code>{{ .Order.ID }}</code></p>
-<p><strong>Status:</strong> {{ .Order.Status }}</p>
-<p><strong>Fulfillment:</strong> {{ .Order.Fulfillment }} | <strong>Region:</strong> {{ .Order.Region }}</p>
-<p><strong>Customer:</strong> {{ .Order.Customer }} ({{ .Order.Email }})</p>
-<p><strong>Placed at:</strong> {{ .Order.CreatedAt }}</p>
+<div class="stack">
+  <section class="panel">
+    <ul class="meta-list">
+      <li><strong>Order ID:</strong> <code>{{ .Order.ID }}</code></li>
+      <li><strong>Status:</strong> {{ .Order.Status }}</li>
+      <li><strong>Fulfillment:</strong> {{ .Order.Fulfillment }}</li>
+      <li><strong>Region:</strong> {{ .Order.Region }}</li>
+      <li><strong>Customer:</strong> {{ .Order.Customer }} ({{ .Order.Email }})</li>
+      <li><strong>Placed at:</strong> {{ .Order.CreatedAt }}</li>
+    </ul>
+  </section>
 
-<h3>Items</h3>
-<table>
-  <tr><th>Item</th><th>Condition</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr>
-  {{ range .Items }}
-  <tr>
-    <td>{{ .Title }}</td>
-    <td>{{ .Condition }}</td>
-    <td>{{ .Qty }}</td>
-    <td>${{ printf "%.2f" .Price }}</td>
-    <td>${{ printf "%.2f" .Subtotal }}</td>
-  </tr>
-  {{ end }}
-</table>
+  <section>
+    <h2>Items</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Item</th><th>Condition</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr>
+      {{ range .Items }}
+      <tr>
+        <td>{{ .Title }}</td>
+        <td>{{ template "condlabel" .Condition }}</td>
+        <td>{{ .Qty }}</td>
+        <td class="price">${{ printf "%.2f" .Price }}</td>
+        <td class="price">${{ printf "%.2f" .Subtotal }}</td>
+      </tr>
+      {{ end }}
+    </table>
+    </div>
+    <p class="total-line">Total: <span class="price">${{ printf "%.2f" .Order.Total }}</span></p>
+  </section>
 
-<p><strong>Total:</strong> ${{ printf "%.2f" .Order.Total }}</p>
-<p><a href="/">Continue shopping</a></p>
+  <p><a class="btn primary" href="/">Continue shopping</a></p>
+</div>
 {{ end }}

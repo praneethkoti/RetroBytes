@@ -1,5 +1,8 @@
 {{ define "admin_users" }}{{ template "header" . }}
+<p class="kicker">Admin</p>
 <h1>Users</h1>
+<p><a href="/admin">Back to admin home</a></p>
+<div class="table-wrap">
 <table class="table">
   <tr><th>Email</th><th>Name</th><th>Role</th><th>Action</th></tr>
   {{ range .Users }}
@@ -10,10 +13,11 @@
     <td>
       <form method="post" action="/admin/users/{{ .ID }}/delete" class="inline-form">
         <input type="hidden" name="csrf" value="{{ $.CSRFToken }}">
-        <button class="btn danger" onclick="return confirm('Delete {{ .Email }} and cancel their orders?')">Delete</button>
+        <button type="submit" class="btn danger" onclick="return confirm('Delete {{ .Email }} and cancel their orders?')">Delete</button>
       </form>
     </td>
   </tr>
   {{ end }}
 </table>
+</div>
 {{ template "footer" . }}{{ end }}

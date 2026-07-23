@@ -1,41 +1,61 @@
 {{ define "product" }}{{ template "header" . }}
-<article>
+<article class="product">
 
-  <h1>{{ .P.Title }}</h1>
-  <div class="hero-wrap">
-    <img class="hero" src="/media/products/{{ .P.ID }}/main.jpg" alt="{{ .P.Title }}" onerror="this.style.display='none'" style="width: 500px; height: auto;">
+  <div class="product-media">
+    <div class="hero-wrap">
+      <img class="hero" src="/media/products/{{ .P.ID }}/main.jpg" alt="{{ .P.Title }}" onerror="this.closest('.hero-wrap').style.display='none'">
+    </div>
   </div>
-  <p><strong>${{ printf "%.2f" .P.Price }}</strong> — {{ .P.Condition }}</p>
-  <p>{{ .P.Description }}</p>
 
-  <section>
-    <h3>Check Availability</h3>
-    <input id="zip" placeholder="Enter ZIP code" inputmode="numeric" pattern="[0-9]{5}" maxlength="5"/>
-    <button onclick="checkAvail()">Check</button>
-    <pre id="avail"></pre>
-  </section>
+  <div class="product-panel">
+    <h1>{{ .P.Title }}</h1>
+    <div class="product-priceline">
+      <span class="price">${{ printf "%.2f" .P.Price }}</span>
+      <span class="badge">{{ template "condlabel" .P.Condition }}</span>
+    </div>
+    <p class="product-desc">{{ .P.Description }}</p>
 
-  <form method="post" action="/cart" style="margin-top:1rem">
-    <input type="hidden" name="productId" value="{{ .P.ID }}"/>
-    <input type="hidden" name="csrf" value="{{ .CSRFToken }}">
-    <label>Qty <input type="number" name="qty" value="1" min="1" style="width:4em"></label>
-    <button type="submit">Add to Cart</button>
-  </form>
+    <div class="product-block">
+      <h3>Check availability</h3>
+      <div class="avail-row">
+        <input id="zip" placeholder="Enter ZIP code" inputmode="numeric" pattern="[0-9]{5}" maxlength="5"/>
+        <button type="button" class="secondary" onclick="checkAvail()">Check</button>
+      </div>
+      <pre id="avail" class="avail-result"></pre>
+    </div>
 
-  <form method="post" action="/wishlist" style="margin-top:0.5rem">
-    <input type="hidden" name="productId" value="{{ .P.ID }}"/>
-    <input type="hidden" name="csrf" value="{{ .CSRFToken }}">
-    <button type="submit">Save to Wishlist</button>
-  </form>
+    <div class="product-block">
+      <h3>Add to your order</h3>
+      <div class="action-block">
+        <form method="post" action="/cart" class="action-row">
+          <input type="hidden" name="productId" value="{{ .P.ID }}"/>
+          <input type="hidden" name="csrf" value="{{ .CSRFToken }}">
+          <label>Qty <input type="number" name="qty" value="1" min="1" style="width:4.5em"></label>
+          <button type="submit">Add to Cart</button>
+        </form>
+        <form method="post" action="/wishlist">
+          <input type="hidden" name="productId" value="{{ .P.ID }}"/>
+          <input type="hidden" name="csrf" value="{{ .CSRFToken }}">
+          <button type="submit" class="secondary">Save to Wishlist</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
 </article>
 
 <script>
 async function checkAvail(){
   const zip = document.getElementById('zip').value.trim();
-  if (!zip) { document.getElementById('avail').textContent = 'Enter a ZIP/postal code'; return; }
-  const res = await fetch(`/api/v1/availability?productId={{ .P.ID }}&region=${encodeURIComponent(zip)}`);
-  const data = await res.json();
-  document.getElementById('avail').textContent = JSON.stringify(data, null, 2);
+  const box = document.getElementById('avail');
+  if (!zip) { box.textContent = 'Enter a 5 digit ZIP code.'; return; }
+  try {
+    const res = await fetch(`/api/v1/availability?productId={{ .P.ID }}&region=${encodeURIComponent(zip)}`);
+    const data = await res.json();
+    box.textContent = JSON.stringify(data, null, 2);
+  } catch (e) {
+    box.textContent = 'Could not check availability. Please try again.';
+  }
 }
 </script>
 {{ template "footer" . }}{{ end }}

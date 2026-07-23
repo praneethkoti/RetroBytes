@@ -1,13 +1,12 @@
-{{ define "login" }}
-  {{ template "header" . }}
+{{ define "login" }}{{ template "header" . }}
+  <p class="kicker">Welcome back</p>
+  <h1>Sign in</h1>
 
-  <main>
-    <h1>Sign in</h1>
+  {{ if .Err }}
+    <div class="alert-bad">{{ .Err }}</div>
+  {{ end }}
 
-    {{ if .Err }}
-      <div class="alert-bad">{{ .Err }}</div>
-    {{ end }}
-
+  <section class="panel" style="max-width:480px">
     <form method="post" action="/login" class="form">
       <input type="hidden" name="csrf" value="{{ .CSRFToken }}">
       <div class="form-group">
@@ -22,8 +21,7 @@
 
       <button type="submit" class="btn primary">Sign in</button>
     </form>
-
-  </main>
+  </section>
 
   <script>
     // Sync CSRF hidden field with the latest csrf_ cookie (helps when tokens rotate)
@@ -36,6 +34,4 @@
       }
     })();
   </script>
-
-  {{ template "footer" . }}
-{{ end }}
+{{ template "footer" . }}{{ end }}

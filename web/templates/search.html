@@ -1,6 +1,7 @@
 {{ define "search" }}{{ template "header" . }}
+<p class="kicker">Find your gear</p>
 <h1>Search</h1>
-<form method="get" action="/search">
+<form method="get" action="/search" class="search-bar">
   <input name="q" value="{{ .Q }}" placeholder="Search products" pattern="[A-Za-z0-9 _\\-']{1,50}" maxlength="50"/>
   <select name="category">
     <option value="">All Categories</option>
@@ -11,13 +12,14 @@
   </select>
   <select name="condition">
     <option value="">Any Condition</option>
-    <option value="FIRST_HAND" {{ if eq .Condition "FIRST_HAND" }}selected{{ end }}>First-hand</option>
+    <option value="FIRST_HAND" {{ if eq .Condition "FIRST_HAND" }}selected{{ end }}>New</option>
     <option value="SECOND_HAND" {{ if eq .Condition "SECOND_HAND" }}selected{{ end }}>Second-hand</option>
   </select>
   <button type="submit">Apply</button>
 </form>
 
-<p>{{ .Count }} result(s)</p>
+{{ if .Err }}<p class="alert-bad">{{ .Err }}</p>{{ end }}
+<p class="muted">{{ .Count }} result(s)</p>
 <div class="grid">
   {{ range .Products }}
   <article class="card">
@@ -27,11 +29,11 @@
     <h3><a href="/product/{{ .ID }}">{{ .Title }}</a></h3>
     <p>
       <span class="price">${{ printf "%.2f" .Price }}</span>
-      — <span class="badge">{{ .Condition }}</span>
+      <span class="badge">{{ template "condlabel" .Condition }}</span>
     </p>
   </article>
   {{ else }}
-  <p>No matches — clear filters to try again.</p>
+  <p class="empty">No matches. Clear the filters to try again.</p>
   {{ end }}
 </div>
 {{ template "footer" . }}{{ end }}

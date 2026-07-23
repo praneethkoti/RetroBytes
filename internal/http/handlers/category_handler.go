@@ -33,6 +33,18 @@ func (h *CategoryHandler) List(c *fiber.Ctx) error {
 		log.Error(c, "category.products.fail", err, map[string]any{"category": catID})
 		return c.Status(500).Render("notfound", fiber.Map{"Message": "Could not load items"})
 	}
-	return render(c, "category", fiber.Map{"CategoryID": catID, "Products": products})
+
+	// Resolve the human display name for the heading (fall back to the slug).
+	categoryName := catID
+	if cats, err := h.Catalog.ListCategories(); err == nil {
+		for _, cat := range cats {
+			if cat.ID == catID {
+				categoryName = cat.Name
+				break
+			}
+		}
+	}
+
+	return render(c, "category", fiber.Map{"CategoryID": catID, "CategoryName": categoryName, "Products": products})
 
 }

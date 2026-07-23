@@ -1,5 +1,9 @@
 {{ define "admin_inventory" }}{{ template "header" . }}
+<p class="kicker">Admin</p>
 <h1>Inventory</h1>
+<p><a href="/admin">Back to admin home</a></p>
+
+<div class="table-wrap">
 <table class="table">
   <tr><th>Product</th><th>Region</th><th>Qty</th><th>Edit</th></tr>
   {{ range .Rows }}
@@ -19,9 +23,10 @@
   </tr>
   {{ end }}
 </table>
+</div>
 
-<h3>Add / Upsert</h3>
-<form method="post" action="/admin/inventory" class="form">
+<h2>Add or update stock</h2>
+<form method="post" action="/admin/inventory" class="search-bar">
   <input type="hidden" name="csrf" value="{{ .CSRFToken }}">
   <input name="product_id" placeholder="product id (e.g., snes-001)" required>
   <input name="region" placeholder="region (e.g., 20742)" required>
@@ -29,15 +34,16 @@
   <button class="btn">Save</button>
 </form>
 
-<h2 style="margin-top:2rem;">Recent Orders</h2>
+<h2>Recent orders</h2>
+<div class="table-wrap">
 <table class="table">
   <tr><th>ID</th><th>Customer</th><th>Status</th><th>Total</th><th>When</th><th>Action</th></tr>
   {{ range .Orders }}
   <tr>
-    <td>{{ .ID }}</td>
+    <td><code>{{ .ID }}</code></td>
     <td>{{ .CustomerName }}</td>
     <td>{{ .Status }}</td>
-    <td>${{ printf "%.2f" .Total }}</td>
+    <td class="price">${{ printf "%.2f" .Total }}</td>
     <td>{{ .CreatedAt }}</td>
     <td>
       <form method="post" action="/admin/orders/{{ .ID }}/status" class="inline-form">
@@ -54,4 +60,5 @@
   </tr>
   {{ end }}
 </table>
+</div>
 {{ template "footer" . }}{{ end }}

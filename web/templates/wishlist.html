@@ -1,18 +1,20 @@
 {{ define "wishlist" }}{{ template "header" . }}
+<p class="kicker">Saved for later</p>
 <h1>Your Wishlist</h1>
+<div class="table-wrap">
 <table>
   <tr><th>Item</th><th>Condition</th><th>Price</th><th>Status</th><th>Action</th></tr>
   {{ range .Items }}
   <tr>
     <td><a href="/product/{{ .ProductID }}">{{ .Title }}</a></td>
-    <td>{{ .Condition }}</td>
-    <td>${{ printf "%.2f" .Price }}</td>
-    <td>{{ if .Active }}Available{{ else }}<strong>Unavailable</strong>{{ end }}</td>
+    <td>{{ template "condlabel" .Condition }}</td>
+    <td class="price">${{ printf "%.2f" .Price }}</td>
+    <td>{{ if .Active }}<span class="badge ok">Available</span>{{ else }}<span class="badge bad">Unavailable</span>{{ end }}</td>
     <td>
-      <form method="post" action="/wishlist/delete" style="display:inline">
+      <form method="post" action="/wishlist/delete" class="inline-form">
         <input type="hidden" name="productId" value="{{ .ProductID }}">
         <input type="hidden" name="csrf" value="{{ $.CSRFToken }}">
-        <button type="submit">Unsave</button>
+        <button type="submit" class="secondary">Unsave</button>
       </form>
     </td>
   </tr>
@@ -20,4 +22,5 @@
   <tr><td colspan="5">Your wishlist is empty.</td></tr>
   {{ end }}
 </table>
+</div>
 {{ template "footer" . }}{{ end }}
