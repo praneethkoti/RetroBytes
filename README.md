@@ -1,5 +1,7 @@
 # RetroBytes
 
+[![CI](https://github.com/praneethkoti/RetroBytes/actions/workflows/ci.yml/badge.svg)](https://github.com/praneethkoti/RetroBytes/actions/workflows/ci.yml)
+
 RetroBytes is a small e-commerce web application for a retro electronics store, built with Go (Fiber v2) and SQLite. It supports browsing categories and products, checking local stock by ZIP, a cart and checkout flow, a per-user wishlist, order history, and an admin area for inventory, orders, and users. The code is organized in layers: domain models, repositories for data access, services for business logic, and HTTP handlers, with bcrypt password hashing and cookie-based sessions.
 
 ## Secure code review remediation
