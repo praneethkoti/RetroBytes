@@ -23,3 +23,5 @@ retrobytes.log
 Thumbs.db
 .vscode/
 .idea/
+# Office lock/temp files (created while a doc is open)
+~$*
