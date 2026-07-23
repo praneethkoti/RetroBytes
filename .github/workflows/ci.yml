@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  # Weekly run so the informational govulncheck job re-checks against the latest
+  # advisory database even when no code changes land.
+  schedule:
+    - cron: "0 6 * * 1"
+
+# Pin the Go version so the build and scans are deterministic and match local.
+# This is the same 1.25.x release the go.mod toolchain directive selects.
+env:
+  GO_VERSION: "1.25.12"
+
+permissions:
+  contents: read
+
+jobs:
+  # Deterministic checks. These determine the CI badge: they depend only on the
+  # code in this repo, so a green badge means the committed code builds, vets,
+  # tests, and passes static analysis.
+  build-test:
+    name: Build, vet, test, gosec
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "${{ env.GO_VERSION }}"
+
+      - name: Build
+        run: go build ./...
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test ./...
+
+      - name: gosec (static analysis)
+        uses: securego/gosec@master
+        with:
+          args: ./...
+
+  # Informational only, does NOT gate the badge. govulncheck compares against the
+  # current published advisory database, so a newly disclosed standard-library or
+  # dependency CVE could turn this red months later with no change to this code.
+  # Keeping it non-blocking ties the badge to our code being clean, while still
+  # surfacing new advisories on every run and on a weekly schedule.
+  govulncheck:
+    name: govulncheck (informational)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "${{ env.GO_VERSION }}"
+
+      - name: Install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Run govulncheck
+        run: govulncheck ./...
