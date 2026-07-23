@@ -22,7 +22,10 @@ func (h *SearchHandler) Search(c *fiber.Ctx) error {
 	}
 	q, ok := validate.Q(rawQ)
 	if !ok {
-		log.Security(c, "validation.fail", map[string]any{"field": "q", "value": rawQ})
+		// Do not log the raw rejected input (avoids log injection and storing
+		// arbitrary attacker-controlled content). Record only the field and
+		// the input length.
+		log.Security(c, "validation.fail", map[string]any{"field": "q", "len": len(rawQ)})
 		return c.Status(fiber.StatusBadRequest).Render("search", fiber.Map{
 			"Q": "", "Products": []any{}, "Count": 0, "Err": "Enter a valid keyword (letters/numbers only)",
 		})

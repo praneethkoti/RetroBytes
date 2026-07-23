@@ -15,7 +15,9 @@ func RequireAdmin(auth *services.AuthService) fiber.Handler {
 		}
 		u, err := auth.CurrentUser(sid)
 		if err != nil || u == nil || u.Role != "ADMIN" {
-			applog.Security(c, "access.denied.admin", map[string]any{"sid": sid})
+			// Do not log the raw sid (it is the session credential). Request id
+			// and IP recorded by the logger are sufficient to correlate.
+			applog.Security(c, "access.denied.admin", nil)
 			return c.Status(fiber.StatusForbidden).Render("notfound", fiber.Map{"Message": "Access denied"})
 		}
 		c.Locals("user", u)

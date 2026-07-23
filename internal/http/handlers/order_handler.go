@@ -65,8 +65,10 @@ func (h *OrderHandler) Place(c *fiber.Ctx) error {
 
 	orderID, serverTotal, clientTotal, err := h.Order.Place(sid, region, fulfillment, contact)
 	if err != nil {
-		// business rule errors (e.g., insufficient stock) surface as 400
-		applog.Security(c, "order.place.fail", map[string]any{"sid": sid, "error": err.Error()})
+		// Business rule errors (e.g., insufficient stock) surface as 400.
+		// Do not log the raw sid (session credential); the error is recorded in
+		// the dedicated err field, correlated by request id/IP.
+		applog.Error(c, "order.place.fail", err, nil)
 		return c.Status(fiber.StatusBadRequest).SendString("Could not place order. Please review quantities and try again.")
 	}
 	applog.Audit(c, "order.place", map[string]any{

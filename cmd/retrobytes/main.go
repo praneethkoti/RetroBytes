@@ -98,8 +98,9 @@ func main() {
 		CookieSameSite: "Lax",
 		CookieSecure:   cfg.CookieSecure, // true behind HTTPS via COOKIE_SECURE
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
-			formTok := c.FormValue("csrf")
-			applog.Security(c, "csrf.fail", map[string]any{"form": formTok})
+			// Do not log the submitted CSRF token value; record only that the
+			// check failed (request id/IP correlate it).
+			applog.Security(c, "csrf.fail", nil)
 			return c.Status(fiber.StatusForbidden).Render("notfound", fiber.Map{"Message": "Security check failed. Please refresh and try again."})
 		},
 	}))
