@@ -23,10 +23,3 @@ retrobytes.log
 Thumbs.db
 .vscode/
 .idea/
-
-# Intentionally-untracked sensitive documents (kept locally, not published).
-# Anchored to exact paths so the rest of documents/ stays tracked.
-# A third party's review work product (contains their name and email):
-/documents/RetroBytes - Secure Code Review Report by reviewer.docx
-# Instructor course material, not for a public repo:
-/documents/ENPM680 - Intro to Secure Software Engineering Project.pdf
