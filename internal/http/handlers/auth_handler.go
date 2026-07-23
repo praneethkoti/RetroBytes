@@ -8,27 +8,10 @@ import (
 	"retrobytes/internal/validate"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 type AuthHandler struct {
 	Auth *services.AuthService
-}
-
-func ensureSID(c *fiber.Ctx) string {
-	sid := c.Cookies("sid")
-	if sid == "" {
-		sid = uuid.NewString()
-		c.Cookie(&fiber.Cookie{
-			Name:     "sid",
-			Value:    sid,
-			Path:     "/",
-			HTTPOnly: true,
-			SameSite: fiber.CookieSameSiteLaxMode,
-			Secure:   false,
-		})
-	}
-	return sid
 }
 
 func (h *AuthHandler) LoginForm(c *fiber.Ctx) error {
@@ -55,13 +38,15 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 		return c.Status(401).Render("login", fiber.Map{"Err": "Invalid email or password", "CSRFToken": tok})
 	}
 
-	_, err := h.Auth.Login(sid, email, pass)
+	_, newSID, err := h.Auth.Login(sid, email, pass)
 	if err != nil {
 		tok := c.Cookies("csrf_")
 		log.Security(c, "auth.login.fail", map[string]any{"email": email})
 		return c.Status(401).Render("login", fiber.Map{"Err": "Invalid email or password", "CSRFToken": tok})
 	}
 
+	// Session id was rotated on login (fixation defense); write the new cookie.
+	writeSIDCookie(c, newSID)
 	log.Audit(c, "auth.login.success", map[string]any{"email": email})
 	return c.Redirect("/")
 }
@@ -69,16 +54,16 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 func (h *AuthHandler) Logout(c *fiber.Ctx) error {
 	sid := ensureSID(c)
 	_ = h.Auth.Logout(sid)
-	// Expire cookie
+	// Expire the session cookie (empty value, past expiry).
 	c.Cookie(&fiber.Cookie{
 		Name:     "sid",
 		Value:    "",
 		Path:     "/",
 		HTTPOnly: true,
 		SameSite: fiber.CookieSameSiteLaxMode,
-		Secure:   false,
+		Secure:   sidCookieSecure,
 		Expires:  time.Now().Add(-1 * time.Hour),
 	})
-	log.Audit(c, "auth.logout", map[string]any{"sid": sid})
+	log.Audit(c, "auth.logout", nil)
 	return c.Redirect("/")
 }

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/csrf"
@@ -112,7 +113,7 @@ func TestAccessDeniedLogs(t *testing.T) {
 	app, _, ordRepo, userRepo := newAccessLogApp(t)
 
 	// Prepare order owned by sid-owner
-	if err := userRepo.BindSession("sid-owner", "u-alice"); err != nil {
+	if err := userRepo.BindSession("sid-owner", "u-alice", 24*time.Hour); err != nil {
 		t.Fatalf("bind owner session: %v", err)
 	}
 	if err := ordRepo.Create("oid-1", "sid-owner", "20742", "delivery", "Alice", "a@x.com", 10); err != nil {

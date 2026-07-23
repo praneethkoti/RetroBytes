@@ -44,8 +44,11 @@ func main() {
 
 	// Auth wiring
 	userRepo := repos.NewUserRepo(db)
-	authSvc := &services.AuthService{Users: userRepo}
+	authSvc := &services.AuthService{Users: userRepo, SessionTTL: cfg.SessionTTL}
 	authH := &handlers.AuthHandler{Auth: authSvc}
+
+	// Session/CSRF cookies carry the Secure flag only when configured (HTTPS).
+	handlers.SetCookieSecure(cfg.CookieSecure)
 
 	// Templates & app
 	engine := html.New("./web/templates", ".html")
@@ -93,7 +96,7 @@ func main() {
 		KeyLookup:      "form:csrf",
 		CookieName:     "csrf_",
 		CookieSameSite: "Lax",
-		CookieSecure:   false, // set true behind HTTPS
+		CookieSecure:   cfg.CookieSecure, // true behind HTTPS via COOKIE_SECURE
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			formTok := c.FormValue("csrf")
 			applog.Security(c, "csrf.fail", map[string]any{"form": formTok})

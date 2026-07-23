@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/csrf"
@@ -64,7 +65,7 @@ func TestAdminGuardRequiresAdmin(t *testing.T) {
 	}
 
 	// Logged-in non-admin -> 403/redirect
-	_ = userRepo.BindSession("sid-user", "u-alice")
+	_ = userRepo.BindSession("sid-user", "u-alice", time.Hour)
 	reqUser := httptest.NewRequest("GET", "/admin", nil)
 	reqUser.AddCookie(&http.Cookie{Name: "sid", Value: "sid-user"})
 	respUser, err := app.Test(reqUser)
@@ -76,7 +77,7 @@ func TestAdminGuardRequiresAdmin(t *testing.T) {
 	}
 
 	// Admin -> 200
-	_ = userRepo.BindSession("sid-admin", "u-admin")
+	_ = userRepo.BindSession("sid-admin", "u-admin", time.Hour)
 	reqAdmin := httptest.NewRequest("GET", "/admin", nil)
 	reqAdmin.AddCookie(&http.Cookie{Name: "sid", Value: "sid-admin"})
 	respAdmin, err := app.Test(reqAdmin)

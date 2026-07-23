@@ -6,31 +6,14 @@ import (
 	"retrobytes/internal/validate"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 type CartHandler struct {
 	Cart *services.CartService
 }
 
-func (h *CartHandler) ensureSID(c *fiber.Ctx) string {
-	sid := c.Cookies("sid")
-	if sid == "" {
-		sid = uuid.NewString()
-		c.Cookie(&fiber.Cookie{
-			Name:     "sid",
-			Value:    sid,
-			Path:     "/",
-			HTTPOnly: true,
-			SameSite: fiber.CookieSameSiteLaxMode,
-			Secure:   false,
-		})
-	}
-	return sid
-}
-
 func (h *CartHandler) Add(c *fiber.Ctx) error {
-	sid := h.ensureSID(c)
+	sid := ensureSID(c)
 	productID := c.FormValue("productId")
 	qty := validate.Qty(c.FormValue("qty"))
 
@@ -49,7 +32,7 @@ func (h *CartHandler) Add(c *fiber.Ctx) error {
 }
 
 func (h *CartHandler) View(c *fiber.Ctx) error {
-	sid := h.ensureSID(c)
+	sid := ensureSID(c)
 	cv, err := h.Cart.View(sid)
 	if err != nil {
 		applog.Error(c, "cart.view.fail", err, nil)

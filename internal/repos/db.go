@@ -2,6 +2,7 @@ package repos
 
 import (
 	"log"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/crypto/bcrypt"
@@ -148,12 +149,22 @@ CREATE TABLE IF NOT EXISTS sessions(
   id TEXT PRIMARY KEY,               -- same value as your 'sid' cookie
   user_id TEXT NULL REFERENCES users(id) ON DELETE SET NULL,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-  last_seen  TEXT
+  last_seen  TEXT,
+  expires_at TEXT                    -- authenticated-session expiry (NULL = anonymous, no expiry)
 );
 CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
 `
-	_, err := db.Exec(schema)
-	return err
+	if _, err := db.Exec(schema); err != nil {
+		return err
+	}
+	// Idempotent migration for databases created before expires_at existed.
+	// SQLite has no "ADD COLUMN IF NOT EXISTS"; ignore the duplicate-column error.
+	if _, err := db.Exec(`ALTER TABLE sessions ADD COLUMN expires_at TEXT`); err != nil {
+		if !strings.Contains(err.Error(), "duplicate column name") {
+			return err
+		}
+	}
+	return nil
 }
 
 func seedIfEmpty(db *sqlx.DB) error {

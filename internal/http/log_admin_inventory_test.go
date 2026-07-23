@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/csrf"
@@ -109,7 +110,7 @@ func TestAdminInventoryLogs(t *testing.T) {
 	app.Get("/login", authH.LoginForm)
 
 	// Bind admin session
-	if err := userRepo.BindSession("sid-admin", "u-admin"); err != nil {
+	if err := userRepo.BindSession("sid-admin", "u-admin", 24*time.Hour); err != nil {
 		t.Fatalf("bind admin session: %v", err)
 	}
 
