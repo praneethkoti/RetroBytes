@@ -2,6 +2,8 @@ module retrobytes
 
 go 1.25.3
 
+toolchain go1.25.12
+
 require (
 	github.com/gofiber/fiber/v2 v2.52.9
 	github.com/gofiber/template/html/v2 v2.1.3
