@@ -61,7 +61,7 @@ Role-gated admin: stock management by region.
 
 ## Run it
 
-Requires Go 1.25 or newer (see [go.mod](go.mod), toolchain `go 1.25.3`). The app serves on `http://localhost:8081`.
+Requires Go 1.25 or newer (see [go.mod](go.mod)). Built and tested with the `go1.25.12` toolchain. The app serves on `http://localhost:8081`.
 
 Configuration is via environment variables:
 
