@@ -2,28 +2,44 @@
 
 [![CI](https://github.com/praneethkoti/RetroBytes/actions/workflows/ci.yml/badge.svg)](https://github.com/praneethkoti/RetroBytes/actions/workflows/ci.yml)
 
+A full-stack retro-electronics store engineered through a complete secure development lifecycle: designed, threat-modeled, built, peer-reviewed, hardened, and deployed.
+
 **Live demo: [retrobytes.onrender.com](https://retrobytes.onrender.com/)** | **Security posture: [retrobytes.onrender.com/security](https://retrobytes.onrender.com/security)**
 
 Hosted on a free tier, so the first load after a period of inactivity may take up to a minute to wake.
 
 RetroBytes is a small e-commerce web application for a retro electronics store, built with Go (Fiber v2) and SQLite. It supports browsing categories and products, checking local stock by ZIP, a cart and checkout flow, a per-user wishlist, order history, and an admin area for inventory, orders, and users. The code is organized in layers: domain models, repositories for data access, services for business logic, and HTTP handlers, with bcrypt password hashing and cookie-based sessions.
 
-## Secure code review remediation
+## Security engineering
 
-RetroBytes went through a peer secure code review that raised 9 findings. I verified all 9 against the actual source rather than trusting the report text, then:
+Security was part of building this application, not a coat of paint applied afterward. The store was taken through a full secure development lifecycle and then validated by an independent peer review.
 
-- **Fixed 4** confirmed findings (session binding, wishlist authorization, sensitive data in logs, plus the wishlist scoping described below).
+### Designed in from the start
+
+Before implementation, the application was specified with requirements and a design (including a traceability matrix mapping requirements to components), then analyzed with STRIDE threat modeling and misuse-case analysis to decide which controls the design needed. The implementation carries those controls:
+
+- **Session management**: the session id is rotated on login (session fixation defense), authenticated sessions expire after a configurable TTL, and the session and CSRF cookie `Secure` flag is driven by configuration for HTTPS deployments.
+- **Input validation**: user input is validated server-side (ZIP and region, a character whitelist and length cap on search, quantity bounds, email and name and password rules, id and category checks) rather than trusting the client.
+- **Output handling**: pages render through Go's `html/template`, which escapes interpolated values by context; no raw-HTML bypass is used.
+- **Logging**: security-relevant events are recorded as structured entries, and sensitive values (session ids, CSRF tokens, and raw rejected search input) are deliberately excluded.
+- **Error handling**: failures return generic messages to the client while the detail is logged server-side.
+- **Credential handling**: no default login credentials ship with the code; demo accounts seed only when explicitly enabled, and the admin account is created only from environment variables with no hardcoded password.
+
+These are documented in-app on the running site's [security posture page](https://retrobytes.onrender.com/security), where each control links to its source.
+
+### Validated by peer review
+
+The app was then given to an independent reviewer for a secure code review, which raised 9 findings. I verified all 9 against the actual source rather than trusting the report text, then:
+
+- **Fixed 4** confirmed findings (session binding, wishlist authorization, sensitive data in logs, and scoping the wishlist to the authenticated user id rather than the session).
 - **Applied 1 defense-in-depth partial**: a page-size cap on search and listing queries. The live route was already bounded, so this hardens a latent path rather than closing an active bug.
 - **Dismissed 4 as false positives** with written justification (an alleged order IDOR that already had a correct owner check, an open redirect that redirects to a fixed path, a stored XSS where template auto-escaping is intact, and error-message info exposure where responses are already generic).
 
-Each fix landed as its own commit with a regression test that fails without the change and passes with it. The full write-up, including the false-positive justifications and the finding-count reconciliation, is in [documents/RetroBytes - Remediation Summary.md](documents/RetroBytes%20-%20Remediation%20Summary.md).
+Each fix landed as its own commit with a regression test that fails without the change and passes with it. That four of the nine findings were false positives is itself a result: the original design held up under outside scrutiny. The full write-up, including the false-positive justifications and the finding-count reconciliation, is in [documents/RetroBytes - Remediation Summary.md](documents/RetroBytes%20-%20Remediation%20Summary.md).
 
-Highlights:
+### Operationalized
 
-- **Session hardening**: the session id is rotated on login (session fixation defense), sessions expire after a configurable TTL, and the session and CSRF cookie `Secure` flag is driven by configuration for HTTPS deployments.
-- **Wishlist authorization**: wishlist read and write now require an authenticated user, and the wishlist is scoped to the user's id rather than the session id. This is a hardening from session-scoped to user-scoped binding. No cross-user exploit existed before the change, because the key was a server-side value with no client-supplied id, but binding to the user id removes any ambiguity.
-- **Log scrubbing**: session ids, CSRF tokens, and raw rejected search input are no longer written to logs (only request id and IP are kept for correlation).
-- **No shipped default credentials**: demo accounts seed only when explicitly requested, and the admin account is created only from environment variables with no hardcoded password.
+Security checks run continuously, not once. CI runs govulncheck and gosec on every push, Dependabot watches the Go and GitHub Actions dependencies, and the deployed app runs with the Secure cookie flag active over HTTPS.
 
 ## Screenshots
 
