@@ -2,6 +2,10 @@
 
 [![CI](https://github.com/praneethkoti/RetroBytes/actions/workflows/ci.yml/badge.svg)](https://github.com/praneethkoti/RetroBytes/actions/workflows/ci.yml)
 
+**Live demo: [retrobytes.onrender.com](https://retrobytes.onrender.com/)** | **Security posture: [retrobytes.onrender.com/security](https://retrobytes.onrender.com/security)**
+
+Hosted on a free tier, so the first load after a period of inactivity may take up to a minute to wake.
+
 RetroBytes is a small e-commerce web application for a retro electronics store, built with Go (Fiber v2) and SQLite. It supports browsing categories and products, checking local stock by ZIP, a cart and checkout flow, a per-user wishlist, order history, and an admin area for inventory, orders, and users. The code is organized in layers: domain models, repositories for data access, services for business logic, and HTTP handlers, with bcrypt password hashing and cookie-based sessions.
 
 ## Secure code review remediation
@@ -20,6 +24,24 @@ Highlights:
 - **Wishlist authorization**: wishlist read and write now require an authenticated user, and the wishlist is scoped to the user's id rather than the session id. This is a hardening from session-scoped to user-scoped binding. No cross-user exploit existed before the change, because the key was a server-side value with no client-supplied id, but binding to the user id removes any ambiguity.
 - **Log scrubbing**: session ids, CSRF tokens, and raw rejected search input are no longer written to logs (only request id and IP are kept for correlation).
 - **No shipped default credentials**: demo accounts seed only when explicitly requested, and the admin account is created only from environment variables with no hardcoded password.
+
+## Screenshots
+
+Storefront, with the security posture surfaced right in the hero.
+
+![RetroBytes storefront home page](documents/screenshots/home.png)
+
+In-app security posture page: each control documented with a link to its source.
+
+![RetroBytes security posture page](documents/screenshots/security.jpeg)
+
+Product detail with availability check and cart and wishlist actions.
+
+![RetroBytes product detail page](documents/screenshots/product.png)
+
+Role-gated admin: stock management by region.
+
+![RetroBytes admin inventory page](documents/screenshots/admin-inventory.jpeg)
 
 ## Run it
 
